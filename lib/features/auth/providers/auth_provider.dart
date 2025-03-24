@@ -1,5 +1,4 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 import '../data/models/auth_state.dart';
 import '../data/repositories/auth_repository.dart';
 
@@ -24,37 +23,6 @@ class AuthNotifier extends _$AuthNotifier {
       await ref.read(authRepositoryProvider).signIn(
             email: email,
             password: password,
-          );
-
-      state = state.copyWith(
-        user: ref.read(authRepositoryProvider).currentUser,
-        isLoading: false,
-      );
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
-      rethrow;
-    }
-  }
-
-  Future<void> signUp({
-    required String email,
-    required String password,
-    required String firstName,
-    required String lastName,
-    String? phone,
-  }) async {
-    state = state.copyWith(isLoading: true, error: null);
-
-    try {
-      await ref.read(authRepositoryProvider).signUp(
-            email: email,
-            password: password,
-            firstName: firstName,
-            lastName: lastName,
-            phone: phone,
           );
 
       state = state.copyWith(
@@ -108,6 +76,36 @@ class AuthNotifier extends _$AuthNotifier {
 
     try {
       await ref.read(authRepositoryProvider).updatePassword(newPassword);
+      state = state.copyWith(isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString(),
+      );
+      rethrow;
+    }
+  }
+
+  Future<void> createAdmin({
+    required String email,
+    required String password,
+    required String firstName,
+    required String lastName,
+    String? phone,
+    required String accessLevel,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      await ref.read(authRepositoryProvider).createAdmin(
+            email: email,
+            password: password,
+            firstName: firstName,
+            lastName: lastName,
+            phone: phone,
+            accessLevel: accessLevel,
+          );
+
       state = state.copyWith(isLoading: false);
     } catch (e) {
       state = state.copyWith(

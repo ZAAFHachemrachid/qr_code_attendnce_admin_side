@@ -1,241 +1,199 @@
-# Implementation Plan: Admin Section and CRUD Operations
+# Department Management Implementation Plan
 
-## Overview
-This plan outlines the implementation of an admin section and CRUD operations for the QR Code Attendance System's admin side.
+## 1. Data Layer
 
-## Implementation Flow
+### 1.1 Department Model (`lib/features/department/data/models/department_model.dart`)
+```dart
+class DepartmentModel {
+  final String id;
+  final String name;
+  final String code;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
-```mermaid
-graph TB
-    A[Project Implementation] --> B[1. Admin Section Implementation]
-    A --> C[2. CRUD Operations Implementation]
-    
-    B --> B1[Add Admin to Sidebar]
-    B --> B2[Create Admin List Page]
-    B --> B3[Create Admin Creation Form]
-    B --> B4[Implement Admin Edit/Delete]
-    
-    C --> C1[Department CRUD]
-    C --> C2[Classes CRUD]
-    C --> C3[Teachers CRUD]
-    C --> C4[Students CRUD]
-    C --> C5[Attendance CRUD]
-    
-    C1 --> D[Common CRUD Components]
-    C2 --> D
-    C3 --> D
-    C4 --> D
-    C5 --> D
-    
-    D --> D1[Data Table Widget]
-    D --> D2[Create/Edit Forms]
-    D --> D3[Delete Confirmation]
-    D --> D4[State Management]
+  // Constructor
+  // fromJson method
+  // toJson method
+  // copyWith method
+}
 ```
 
-## Detailed Implementation Steps
+### 1.2 Department Repository (`lib/features/department/data/repositories/department_repository.dart`)
+```dart
+class DepartmentRepository {
+  final SupabaseClient _supabaseClient;
 
-### 1. Admin Section Implementation
-
-#### Directory Structure
-```
-lib/
-  features/
-    admin/
-      data/
-        models/
-          admin_model.dart
-        repositories/
-          admin_repository.dart
-      presentation/
-        pages/
-          admin_page.dart
-          create_admin_page.dart
-          edit_admin_page.dart
-        widgets/
-          admin_list.dart
-          admin_form.dart
-      providers/
-        admin_provider.dart
+  // CRUD Operations
+  Future<List<DepartmentModel>> getDepartments();
+  Future<DepartmentModel> getDepartment(String id);
+  Future<DepartmentModel> createDepartment(DepartmentModel department);
+  Future<DepartmentModel> updateDepartment(DepartmentModel department);
+  Future<void> deleteDepartment(String id);
+  Future<void> deleteBulkDepartments(List<String> ids);
+  
+  // Search/Filter
+  Future<List<DepartmentModel>> searchDepartments(String query);
+  
+  // CSV Export
+  Future<String> exportToCSV(List<DepartmentModel> departments);
+}
 ```
 
-#### Components
-1. **Sidebar Navigation**
-   - Add admin icon and label
-   - Update navigation provider
+## 2. State Management
 
-2. **Admin List Page**
-   - Data table showing admin details:
-     * Name
-     * Phone
-     * Access Level
-     * Creation Date
-   - Actions column for edit/delete
-   - Create new admin button
+### 2.1 Department Provider (`lib/features/department/providers/department_provider.dart`)
+```dart
+class DepartmentNotifier extends StateNotifier<DepartmentState> {
+  final DepartmentRepository _repository;
+  
+  // State Management
+  Future<void> loadDepartments();
+  Future<void> createDepartment(DepartmentModel department);
+  Future<void> updateDepartment(DepartmentModel department);
+  Future<void> deleteDepartment(String id);
+  Future<void> deleteBulkDepartments(List<String> ids);
+  Future<void> searchDepartments(String query);
+  Future<void> exportToCSV();
+  
+  // Selection Management
+  void toggleSelection(String id);
+  void clearSelection();
+  void selectAll();
+}
 
-3. **Admin Creation Form**
-   - Fields:
-     * First Name
-     * Last Name
-     * Phone
-     * Access Level (super/limited)
-   - Form validation
-   - Success/error handling
+@freezed
+class DepartmentState with _$DepartmentState {
+  const factory DepartmentState({
+    required List<DepartmentModel> departments,
+    required Set<String> selectedIds,
+    required bool isLoading,
+    required String? errorMessage,
+    required String searchQuery,
+  }) = _DepartmentState;
+}
+```
 
-4. **Edit/Delete Functionality**
-   - Edit form with pre-filled data
-   - Delete confirmation dialog
-   - Success/error feedback
+## 3. UI Layer
 
-### 2. Data Layer Setup
+### 3.1 Department Page (`lib/features/department/presentation/pages/department_page.dart`)
+```dart
+class DepartmentPage extends ConsumerWidget {
+  // UI Components:
+  // 1. Search bar
+  // 2. Data table
+  // 3. Bulk action buttons
+  // 4. CSV export button
+  // 5. Add department button
+  
+  // State Management:
+  // - Department list
+  // - Selected departments
+  // - Loading state
+  // - Error handling
+}
+```
 
-1. **Data Models**
-   - Create entity models matching database schema
-   - Implement toJson/fromJson methods
-   - Add validation methods
+### 3.2 Department Form (`lib/features/department/presentation/widgets/department_form.dart`)
+```dart
+class DepartmentForm extends ConsumerWidget {
+  // Form Fields:
+  // 1. Name input
+  // 2. Code input
+  
+  // Validation:
+  // - Required fields
+  // - Code format
+  // - Unique code check
+  
+  // Actions:
+  // - Submit (Create/Update)
+  // - Cancel
+}
+```
 
-2. **Supabase Integration**
-   - Configure Supabase client
-   - Create repository classes
-   - Implement error handling
-   - Add loading state management
+### 3.3 Enhanced DataTable (`lib/features/department/presentation/widgets/department_table.dart`)
+```dart
+class DepartmentTable extends ConsumerWidget {
+  // Features:
+  // 1. Sortable columns
+  // 2. Row selection
+  // 3. Bulk actions
+  // 4. Search integration
+  
+  // Columns:
+  // - Selection checkbox
+  // - Code
+  // - Name
+  // - Created At
+  // - Actions
+}
+```
 
-### 3. CRUD Operations by Section
+## 4. File Structure
+```
+lib/features/department/
+├── data/
+│   ├── models/
+│   │   └── department_model.dart
+│   └── repositories/
+│       └── department_repository.dart
+├── presentation/
+│   ├── pages/
+│   │   └── department_page.dart
+│   └── widgets/
+│       ├── department_form.dart
+│       └── department_table.dart
+└── providers/
+    ├── department_provider.dart
+    └── department_state.dart
+```
 
-#### a. Department Management
-1. **List View**
-   - Data table with departments
-   - Sorting and filtering
-   - Pagination support
+## 5. Implementation Steps
 
-2. **Create/Edit**
-   - Department form:
-     * Name
-     * Code
-   - Validation
-   - Success/error handling
+1. **Data Layer Setup**
+   - Create department model
+   - Implement repository with Supabase integration
+   - Add error handling and validation
 
-3. **Delete**
-   - Confirmation dialog
-   - Dependency checking
+2. **State Management**
+   - Create provider with state management
+   - Implement CRUD operations
+   - Add selection management
+   - Implement search functionality
 
-#### b. Classes Management
-1. **List View**
-   - Data table with class details
-   - Department filter
-   - Search functionality
+3. **UI Components**
+   - Create department table widget
+   - Implement department form
+   - Add search bar and filters
+   - Implement bulk operations UI
+   - Add CSV export functionality
 
-2. **Create/Edit**
-   - Class form:
-     * Department selection
-     * Academic year
-     * Current year
-     * Section
-     * Name
+4. **Testing**
+   - Unit tests for model and repository
+   - Widget tests for form and table
+   - Integration tests for CRUD operations
 
-3. **Delete**
-   - Confirmation dialog
-   - Check for enrolled students
+## 6. Additional Features
 
-#### c. Teachers Management
-1. **List View**
-   - Data table with teacher details
-   - Department filter
-   - Search by name/ID
+### 6.1 CSV Export Format
+```csv
+Code,Name,Created At
+CS,Computer Science,2024-03-24
+EE,Electrical Engineering,2024-03-24
+```
 
-2. **Create Form**
-   - Registration style form:
-     * Personal details
-     * Department assignment
-     * Employee ID
-   - Form validation
+### 6.2 Search/Filter
+- Search by name or code
+- Case-insensitive search
+- Debounced input (300ms)
 
-3. **Edit/Delete**
-   - Update teacher information
-   - Handle course assignments
+### 6.3 Bulk Operations
+- Select all/none
+- Delete selected
+- Confirmation dialogs
 
-#### d. Students Management
-1. **List View**
-   - Data table with student details
-   - Class/group filter
-   - Search functionality
-
-2. **Create Form**
-   - Registration style form:
-     * Personal details
-     * Student number
-     * Class/group assignment
-   - Form validation
-
-3. **Edit/Delete**
-   - Update student information
-   - Handle attendance records
-
-#### e. Attendance Management
-1. **List View**
-   - Data table with attendance records
-   - Multiple filters:
-     * Date range
-     * Course
-     * Student
-     * Status
-   - Export functionality
-
-2. **Create/Edit**
-   - Attendance form
-   - Status update
-   - Bulk operations
-
-### 4. Common Components Development
-
-1. **Data Table Widget**
-   - Sorting capabilities
-   - Filtering system
-   - Pagination
-   - Selection controls
-   - Action buttons
-
-2. **Form Components**
-   - Input fields
-   - Dropdown selects
-   - Date/time pickers
-   - Validation display
-   - Submit/cancel buttons
-
-3. **Dialog Components**
-   - Confirmation dialogs
-   - Error dialogs
-   - Loading indicators
-
-4. **Feedback Components**
-   - Success/error snackbars
-   - Loading overlays
-   - Error displays
-
-### 5. State Management
-
-1. **Provider Setup**
-   - Feature-specific providers
-   - Global state providers
-   - Loading state management
-   - Error state handling
-
-2. **State Organization**
-   - Clear state interfaces
-   - Immutable state updates
-   - State persistence where needed
-
-## Implementation Order
-
-1. Common Components
-2. Admin Section
-3. Department CRUD
-4. Classes CRUD
-5. Teachers CRUD
-6. Students CRUD
-7. Attendance CRUD
-
-## Next Steps
-1. Switch to Code mode to begin implementing the common components
-2. Start with the admin section implementation
-3. Progressively implement CRUD operations for each section
+### 6.4 Error Handling
+- Duplicate code validation
+- Network error handling
+- Loading states
+- User-friendly error messages

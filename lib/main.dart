@@ -15,6 +15,7 @@ import 'features/teachers/presentation/pages/teachers_page.dart';
 
 // Auth imports
 import 'features/auth/presentation/widgets/auth_wrapper.dart';
+import 'features/auth/providers/auth_provider.dart';
 
 // Shared imports
 import 'shared/constants/supabase_constants.dart';
@@ -24,10 +25,12 @@ import 'shared/widgets/sidebar.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  print('Initializing Supabase with service role...');
   await Supabase.initialize(
     url: SupabaseConstants.url,
-    anonKey: SupabaseConstants.anonKey,
+    anonKey: SupabaseConstants.serviceKey, // Use service key for all operations
   );
+  print('Supabase initialized');
 
   runApp(const ProviderScope(child: MainApp()));
 }
@@ -37,6 +40,13 @@ class MainApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final navIndex = ref.watch(navigationControllerProvider);
+    print('MainApp build - Navigation Index: $navIndex');
+
+    final authState = ref.watch(authNotifierProvider);
+    print('MainApp build - User Authenticated: ${authState.user != null}');
+    print('MainApp build - User Email: ${authState.user?.email}');
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -54,25 +64,31 @@ class MainApp extends ConsumerWidget {
         useMaterial3: true,
       ),
       home: AuthWrapper(
-        child: Row(
-          children: [
-            const Sidebar(),
-            Expanded(
-              child: IndexedStack(
-                index: ref.watch(navigationControllerProvider),
-                children: const [
-                  OverviewPage(),
-                  DepartmentPage(),
-                  ClassesPage(),
-                  TeachersPage(),
-                  StudentsPage(),
-                  AttendancePage(),
-                  ReportsPage(),
-                  AdminPage(),
+        child: Builder(
+          builder: (context) {
+            return Scaffold(
+              body: Row(
+                children: [
+                  const Sidebar(),
+                  Expanded(
+                    child: IndexedStack(
+                      index: ref.watch(navigationControllerProvider),
+                      children: const [
+                        OverviewPage(),
+                        DepartmentPage(),
+                        ClassesPage(),
+                        TeachersPage(),
+                        StudentsPage(),
+                        AttendancePage(),
+                        ReportsPage(),
+                        AdminPage(),
+                      ],
+                    ),
+                  ),
                 ],
               ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );

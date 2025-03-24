@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
-import 'signup_page.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -73,6 +72,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 8),
+                      const Center(
+                        child: Text(
+                          'Admin Access Only',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: 32),
                       TextFormField(
                         controller: _emailController,
@@ -138,15 +147,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             : const Text('Login'),
                       ),
                       const SizedBox(height: 16),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const SignupPage(),
-                            ),
-                          );
-                        },
-                        child: const Text('Don\'t have an account? Sign Up'),
+                      Center(
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/signup');
+                          },
+                          child: const Text('Create Admin Account'),
+                        ),
                       ),
                     ],
                   ),

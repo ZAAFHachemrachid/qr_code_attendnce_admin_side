@@ -1,41 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
-import 'login_page.dart';
 
-class SignupPage extends ConsumerStatefulWidget {
-  const SignupPage({super.key});
+class AdminSignUpPage extends ConsumerStatefulWidget {
+  const AdminSignUpPage({super.key});
 
   @override
-  ConsumerState<SignupPage> createState() => _SignupPageState();
+  ConsumerState<AdminSignUpPage> createState() => _AdminSignUpPageState();
 }
 
-class _SignupPageState extends ConsumerState<SignupPage> {
+class _AdminSignUpPageState extends ConsumerState<AdminSignUpPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _phoneController = TextEditingController();
   bool _isPasswordVisible = false;
+  String _accessLevel = 'limited';
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _confirmPasswordController.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
     _phoneController.dispose();
     super.dispose();
   }
 
-  Future<void> _signup() async {
+  Future<void> _signUp() async {
     if (!_formKey.currentState!.validate()) return;
 
     try {
-      await ref.read(authNotifierProvider.notifier).signUp(
+      await ref.read(authNotifierProvider.notifier).createAdmin(
             email: _emailController.text.trim(),
             password: _passwordController.text,
             firstName: _firstNameController.text.trim(),
@@ -43,7 +41,19 @@ class _SignupPageState extends ConsumerState<SignupPage> {
             phone: _phoneController.text.isEmpty
                 ? null
                 : _phoneController.text.trim(),
+            accessLevel: _accessLevel,
           );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Account created successfully! Please login.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      Navigator.of(context).pop(); // Go back to login page
     } catch (e) {
       if (!mounted) return;
 
@@ -61,6 +71,9 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     final authState = ref.watch(authNotifierProvider);
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Sign Up'),
+      ),
       body: Center(
         child: SingleChildScrollView(
           child: Container(
@@ -76,49 +89,44 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Text(
-                        'Create Account',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                      const Center(
+                        child: Text(
+                          'Create Admin Account',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 32),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _firstNameController,
-                              decoration: const InputDecoration(
-                                labelText: 'First Name',
-                                border: OutlineInputBorder(),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter your first name';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: TextFormField(
-                              controller: _lastNameController,
-                              decoration: const InputDecoration(
-                                labelText: 'Last Name',
-                                border: OutlineInputBorder(),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter your last name';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                        ],
+                      TextFormField(
+                        controller: _firstNameController,
+                        decoration: const InputDecoration(
+                          labelText: 'First Name',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.person),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your first name';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _lastNameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Last Name',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.person),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your last name';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
@@ -138,16 +146,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                           }
                           return null;
                         },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _phoneController,
-                        decoration: const InputDecoration(
-                          labelText: 'Phone (Optional)',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.phone),
-                        ),
-                        keyboardType: TextInputType.phone,
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
@@ -182,26 +180,42 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
-                        controller: _confirmPasswordController,
+                        controller: _phoneController,
                         decoration: const InputDecoration(
-                          labelText: 'Confirm Password',
+                          labelText: 'Phone (Optional)',
                           border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.lock_outline),
+                          prefixIcon: Icon(Icons.phone),
                         ),
-                        obscureText: !_isPasswordVisible,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please confirm your password';
-                          }
-                          if (value != _passwordController.text) {
-                            return 'Passwords do not match';
-                          }
-                          return null;
+                        keyboardType: TextInputType.phone,
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Access Level',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      RadioListTile<String>(
+                        title: const Text('Limited Access'),
+                        value: 'limited',
+                        groupValue: _accessLevel,
+                        onChanged: (value) {
+                          setState(() {
+                            _accessLevel = value!;
+                          });
+                        },
+                      ),
+                      RadioListTile<String>(
+                        title: const Text('Super Admin'),
+                        value: 'super',
+                        groupValue: _accessLevel,
+                        onChanged: (value) {
+                          setState(() {
+                            _accessLevel = value!;
+                          });
                         },
                       ),
                       const SizedBox(height: 24),
                       FilledButton(
-                        onPressed: authState.isLoading ? null : _signup,
+                        onPressed: authState.isLoading ? null : _signUp,
                         child: authState.isLoading
                             ? const SizedBox(
                                 width: 20,
@@ -212,17 +226,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                                 ),
                               )
                             : const Text('Sign Up'),
-                      ),
-                      const SizedBox(height: 16),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (_) => const LoginPage(),
-                            ),
-                          );
-                        },
-                        child: const Text('Already have an account? Login'),
                       ),
                     ],
                   ),
