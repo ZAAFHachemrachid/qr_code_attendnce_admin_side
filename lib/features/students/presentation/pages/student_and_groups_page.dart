@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/tab_provider.dart';
 import 'students_page.dart';
 import 'groups_page.dart';
 
@@ -19,6 +20,11 @@ class _StudentAndGroupsPageState extends ConsumerState<StudentAndGroupsPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(_handleTabSelection);
+  }
+
+  void _handleTabSelection() {
+    ref.read(mainTabIndexProvider.notifier).state = _tabController.index;
   }
 
   @override
@@ -31,19 +37,27 @@ class _StudentAndGroupsPageState extends ConsumerState<StudentAndGroupsPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Students & Groups Management'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(
-              icon: Icon(Icons.people),
-              text: 'Students',
+        centerTitle: false,
+        title: const Text('Students Management'),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(kToolbarHeight),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              tabs: const [
+                Tab(
+                  icon: Icon(Icons.people),
+                  text: 'Students',
+                ),
+                Tab(
+                  icon: Icon(Icons.group_work),
+                  text: 'Groups',
+                ),
+              ],
             ),
-            Tab(
-              icon: Icon(Icons.group_work),
-              text: 'Groups',
-            ),
-          ],
+          ),
         ),
       ),
       body: TabBarView(
