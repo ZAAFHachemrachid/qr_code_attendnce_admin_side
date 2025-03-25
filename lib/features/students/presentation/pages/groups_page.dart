@@ -5,37 +5,21 @@ import '../../providers/student_provider.dart';
 import '../../providers/group_provider.dart';
 import '../../providers/tab_provider.dart';
 import '../enums/management_tab.dart';
-import '../widgets/student_form.dart';
+import '../widgets/group_form.dart';
 import '../widgets/details_tab.dart';
 
-class StudentsPage extends ConsumerWidget {
-  const StudentsPage({super.key});
-
-  String _getGroupName(
-      String? studentGroupId, AsyncValue<List<dynamic>> groupsAsync) {
-    if (studentGroupId == null) return '-';
-
-    switch (groupsAsync) {
-      case AsyncData(:final value):
-        final group = value.where((g) => g.id == studentGroupId).firstOrNull;
-        if (group != null) {
-          return group.name ?? '${group.academicYear}-${group.section}';
-        }
-      default:
-        return '-';
-    }
-    return '-';
-  }
+class GroupsPage extends ConsumerWidget {
+  const GroupsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final studentsAsync = ref.watch(studentNotifierProvider);
     final groupsAsync = ref.watch(groupNotifierProvider);
-    final selectedStudentId = ref.watch(studentsTabNotifierProvider).selectedId;
+    final studentsAsync = ref.watch(studentNotifierProvider);
+    final selectedGroupId = ref.watch(groupsTabNotifierProvider).selectedId;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Students Management'),
+        title: const Text('Groups Management'),
       ),
       body: Row(
         children: [
@@ -44,37 +28,43 @@ class StudentsPage extends ConsumerWidget {
             flex: 2,
             child: Card(
               margin: const EdgeInsets.all(8.0),
-              child: studentsAsync.when(
-                data: (students) {
-                  final data = students.map((student) {
+              child: groupsAsync.when(
+                data: (groups) {
+                  final data = groups.map((group) {
+                    int studentCount = 0;
+                    if (studentsAsync case AsyncData(:final value)) {
+                      studentCount =
+                          value.where((s) => s.groupId == group.id).length;
+                    }
+
                     return {
-                      'id': student.id,
-                      'student_number': student.studentNumber,
-                      'first_name': student.firstName,
-                      'last_name': student.lastName,
-                      'phone': student.phone ?? '-',
-                      'group': _getGroupName(student.groupId, groupsAsync),
+                      'id': group.id,
+                      'name': group.name ?? '-',
+                      'academic_year': group.academicYear.toString(),
+                      'current_year': group.currentYear.toString(),
+                      'section': group.section,
+                      'students': studentCount.toString(),
                     };
                   }).toList();
 
                   return SelectableDataTable(
                     columns: const [
-                      DataColumn(label: Text('Student Number')),
-                      DataColumn(label: Text('First Name')),
-                      DataColumn(label: Text('Last Name')),
-                      DataColumn(label: Text('Phone')),
-                      DataColumn(label: Text('Group')),
+                      DataColumn(label: Text('Name')),
+                      DataColumn(label: Text('Academic Year')),
+                      DataColumn(label: Text('Current Year')),
+                      DataColumn(label: Text('Section')),
+                      DataColumn(label: Text('Students')),
                     ],
                     data: data,
-                    noDataMessage: 'No students found',
-                    isLoading: studentsAsync is AsyncLoading,
-                    errorMessage: studentsAsync is AsyncError
-                        ? studentsAsync.error.toString()
+                    noDataMessage: 'No groups found',
+                    isLoading: groupsAsync is AsyncLoading,
+                    errorMessage: groupsAsync is AsyncError
+                        ? groupsAsync.error.toString()
                         : null,
                     onSelect: (item) {
-                      // Set the selected student for the right panel
+                      // Set the selected group for the right panel
                       ref
-                          .read(studentsTabNotifierProvider.notifier)
+                          .read(groupsTabNotifierProvider.notifier)
                           .selectItem(item['id']);
                     },
                   );
@@ -109,30 +99,24 @@ class StudentsPage extends ConsumerWidget {
                         children: [
                           SingleChildScrollView(
                             padding: const EdgeInsets.all(16),
-                            child: StudentForm(
-                              onSubmit: (firstName,
-                                  lastName,
-                                  phone,
-                                  studentNumber,
-                                  groupId,
-                                  email,
-                                  password) async {
+                            child: GroupForm(
+                              onSubmit: (departmentId, academicYear,
+                                  currentYear, section, name) async {
                                 try {
                                   await ref
-                                      .read(studentNotifierProvider.notifier)
-                                      .addStudent(
-                                        email: email,
-                                        password: password,
-                                        firstName: firstName,
-                                        lastName: lastName,
-                                        phone: phone,
-                                        studentNumber: studentNumber,
+                                      .read(groupNotifierProvider.notifier)
+                                      .addGroup(
+                                        departmentId: departmentId,
+                                        academicYear: academicYear,
+                                        currentYear: currentYear,
+                                        section: section,
+                                        name: name,
                                       );
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                         content:
-                                            Text('Student added successfully'),
+                                            Text('Group added successfully'),
                                       ),
                                     );
                                   }
@@ -149,19 +133,19 @@ class StudentsPage extends ConsumerWidget {
                               },
                             ),
                           ),
-                          if (selectedStudentId != null) ...[
+                          if (selectedGroupId != null) ...[
                             const Center(child: Text('Update')), // Placeholder
                             const Center(child: Text('Delete')), // Placeholder
-                            const DetailsTab(isStudent: true),
+                            const DetailsTab(isStudent: false),
                           ] else ...[
                             const Center(
-                              child: Text('Select a student to update'),
+                              child: Text('Select a group to update'),
                             ),
                             const Center(
-                              child: Text('Select a student to delete'),
+                              child: Text('Select a group to delete'),
                             ),
                             const Center(
-                              child: Text('Select a student to view details'),
+                              child: Text('Select a group to view details'),
                             ),
                           ],
                         ],
