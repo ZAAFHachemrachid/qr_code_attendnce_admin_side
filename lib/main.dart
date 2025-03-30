@@ -9,6 +9,7 @@ import 'features/overview/overview.dart';
 import 'features/attendance/presentation/pages/attendance_page.dart';
 import 'features/classes/presentation/pages/classes_page.dart';
 import 'features/department/presentation/pages/department_page.dart';
+import 'features/groups/presentation/pages/groups_page.dart';
 import 'features/reports/presentation/pages/reports_page.dart';
 import 'features/students/presentation/pages/students_page.dart';
 import 'features/teachers/presentation/pages/teachers_page.dart';
@@ -78,6 +79,7 @@ class MainApp extends ConsumerWidget {
                         DepartmentPage(),
                         ClassesPage(),
                         TeachersPage(),
+                        GroupsPage(),
                         StudentsPage(),
                         AttendancePage(),
                         ReportsPage(),

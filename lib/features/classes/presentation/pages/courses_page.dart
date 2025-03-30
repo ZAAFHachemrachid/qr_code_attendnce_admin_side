@@ -4,8 +4,8 @@ import '../../providers/course_provider.dart';
 import '../../../../shared/widgets/common/data_table_widget.dart';
 import '../widgets/course_form_dialog.dart';
 
-class ClassesPage extends ConsumerWidget {
-  const ClassesPage({super.key});
+class CoursesPage extends ConsumerWidget {
+  const CoursesPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -13,7 +13,7 @@ class ClassesPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Classes'),
+        title: const Text('Courses'),
         centerTitle: true,
       ),
       body: coursesAsync.when(

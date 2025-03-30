@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../shared/widgets/common/selectable_data_table.dart';
+import '../../../../features/groups/providers/group_provider.dart';
 import '../../providers/student_provider.dart';
-import '../../providers/group_provider.dart';
 import '../../providers/tab_provider.dart';
 import '../enums/management_tab.dart';
 import '../widgets/student_form.dart';

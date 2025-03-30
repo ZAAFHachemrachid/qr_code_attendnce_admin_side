@@ -105,6 +105,10 @@ class Sidebar extends ConsumerWidget {
                   label: Text('Teachers'),
                 ),
                 NavigationRailDestination(
+                  icon: Icon(Icons.groups),
+                  label: Text('Groups'),
+                ),
+                NavigationRailDestination(
                   icon: Icon(Icons.school),
                   label: Text('Students'),
                 ),
